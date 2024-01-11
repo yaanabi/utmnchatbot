@@ -148,7 +148,7 @@ if __name__ == '__main__':
     cursor = conn.cursor()
 
 
-    app = ApplicationBuilder().token('6593288094:AAEaoKHSXV_sQDGSj6C2W9lCF6bjL5f3Bmg').build()
+    app = ApplicationBuilder().token('BOT TOKEN').build()
     conv_handler = ConversationHandler(
         entry_points = [CommandHandler('start', start)],
         states={
