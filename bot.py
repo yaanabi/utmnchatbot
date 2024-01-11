@@ -1,4 +1,5 @@
 import logging
+import config
 from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import (
     ApplicationBuilder, 
@@ -10,11 +11,17 @@ from telegram.ext import (
     filters
     )
 import sqlite3
+
+
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s-%(message)s',
     level=logging.INFO
 )
+
+
 logger = logging.getLogger(__name__)
+
+
 GENDER, SUBJECTSTRONG, SUBJECTWEAK, PHOTO, BIO = range(5)
 
 
@@ -148,7 +155,7 @@ if __name__ == '__main__':
     cursor = conn.cursor()
 
 
-    app = ApplicationBuilder().token('BOT TOKEN').build()
+    app = ApplicationBuilder().token(config.BOT_TOKEN).build()
     conv_handler = ConversationHandler(
         entry_points = [CommandHandler('start', start)],
         states={
