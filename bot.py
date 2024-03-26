@@ -140,7 +140,22 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def match_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    pass
+  user_data = context.user_data
+  user_id = user_data['user_id']
+  matched_users = db_find_match(user_data)
+  if not matched_users:
+      await update.message.reply_text("Unfortunately, no suitable partners have been found at the moment. Try again later!")
+      return
+
+  best_match = select_best_match(matched_users, user_data)  # Implement this function
+
+  if not best_match:
+      await update.message.reply_text("Couldn't find a better match for your preference. We picked up someone for you anyway. You can repeat the search if you want!")
+  
+  partner_data = cursor.execute("SELECT * FROM chatusers WHERE user_id = ?", (best_match['user_id'],)).fetchone()
+  await notify_users(user_data, partner_data)
+  await update.message.reply_text("Great news! We found a match for you. Check your messages to start chatting!")
+  return ConversationHandler.END
 
 
 def db_table_add_user(user_id: int, user_name: str, user_surname: str, username: str, user_bio: str, subject_strong: str, subject_weak: str, user_gender: str):
@@ -169,6 +184,68 @@ def db_find_user(username):
             return None
     except Exception as e:
         print("Failed to find user in sqlite table: ", e)
+def db_find_match(user_data):
+    try:
+        matched_users = cursor.execute("""
+            SELECT * FROM chatusers 
+            WHERE (subject_strong = ? AND subject_weak = ?) 
+            OR (subject_strong = ? AND subject_weak = ?)
+            """,
+            (user_data['subject_weak'], user_data['subject_strong'],
+             user_data['subject_strong'], user_data['subject_weak'])).fetchall()
+        return matched_users
+    except Exception as e:
+        print("Failed to find match in sqlite table: ", e)
+        return None
+def select_best_match(matched_users, user_data):
+   
+    # Implement a scoring system based on compatibility factors
+    # Consider gender preferences, subject strength/weakness, and other factors
+
+    if not matched_users:
+        return None
+
+    best_match = matched_users[0]
+    for user in matched_users:
+        if user['user_gender'] == user_data['user_gender_pref']:
+            best_match = user
+        elif user['subject_strong'] == user_data['subject_weak']:
+            best_match = user
+
+    return best_match
+def notify_users(user_data, partner_data):
+    """
+    Sends messages to both the user and the matched user to initiate communication.
+
+    Args:
+        user_data: The user's data.
+        partner_data: The matched user's data.
+    """
+    # Use Telegram Bot API to send messages to specific users
+    # Include introductions or contact information in the messages
+
+    from telegram import Bot
+
+    bot = Bot(token='6593288094:AAEaoKHSXV_sQDGSj6C2W9lCF6bjL5f3Bmg')
+
+    message = f"Привет! \n\n" \
+              f"Я нашел тебе партнера для учебы: {partner_data['user_name']}.\n" \
+              f"Его/ее сильная сторона - {partner_data['subject_strong']}, а слабая - {partner_data['subject_weak']}.\n" \
+              f"Начните общаться, чтобы помочь друг другу!\n\n" \
+              f"**Контактная информация:**\n" \
+              f"{partner_data['username']}"
+
+    bot.send_message(chat_id=user_data['user_id'], text=message)
+
+    message = f"Привет! \n\n" \
+              f"Я нашел тебе партнера для учебы: {user_data['user_name']}.\n" \
+              f"Его/ее сильная сторона - {user_data['subject_strong']}, а слабая - {user_data['subject_weak']}.\n" \
+              f"Начните общаться, чтобы помочь друг другу!\n\n" \
+              f"**Контактная информация:**\n" \
+              f"{user_data['username']}"
+
+    bot.send_message(chat_id=partner_data['user_id'], text=message)
+
 
 
 if __name__ == 'main':
