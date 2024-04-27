@@ -171,7 +171,6 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def unknown(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Sorry, i didn't understand that command")
  
- 
 # DB functions 
  
 def db_delete_user(user_id: int):
