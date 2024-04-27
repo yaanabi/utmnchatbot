@@ -1,0 +1,5 @@
+*.log
+*.sql
+*.sqlite
+*.sqlite3
+config.py
