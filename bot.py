@@ -12,7 +12,6 @@ from telegram.ext import (
     MessageHandler,
     filters
 )
-)
 import sqlite3
  
  
@@ -34,7 +33,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if db_find_user(user.username):
         await update.message.reply_text(
             f'Hello {user.first_name}! Glad to see you again'
-        )
         )
     else:
         context.user_data['user_id'] = user.id
