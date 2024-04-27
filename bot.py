@@ -1,5 +1,5 @@
 import logging
- 
+from config import BOT_TOKEN
  
 from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import (
@@ -227,7 +227,7 @@ if __name__ == '__main__':
     cursor = conn.cursor()
  
     app = ApplicationBuilder().token(
-        '6593288094:AAEaoKHSXV_sQDGSj6C2W9lCF6bjL5f3Bmg').build()
+        BOT_TOKEN).build()
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler('start', start)],
         states={
